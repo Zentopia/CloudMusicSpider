@@ -1,4 +1,4 @@
-package model;
+package com.utopia.model;
 
 public class WebPageModel {
     public enum PageType{

@@ -1,5 +1,6 @@
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+
 import java.io.IOException;
 
 public class WebFetcher {
@@ -17,5 +18,7 @@ public class WebFetcher {
 
         return response.body();
     }
+
+
 
 }
