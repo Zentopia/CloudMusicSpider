@@ -1,9 +1,12 @@
+package com.utopia;
+
+import com.utopia.service.WebFetcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class CloudMusicSpider {
+public class Application {
 
-    private static Log log = LogFactory.getLog(CloudMusicSpider.class);
+    private static Log log = LogFactory.getLog(Application.class);
 
     public static void main(String[] args){
 
