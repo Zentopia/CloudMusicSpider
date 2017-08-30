@@ -15,7 +15,6 @@ public class Application {
         String result = webFetcher.fetch(url);
         log.info(result);
 
-
     }
 
 
