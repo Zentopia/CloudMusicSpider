@@ -21,6 +21,4 @@ public class WebFetcher {
         return response.body();
     }
 
-
-
 }

@@ -7,10 +7,15 @@ public class WebPageModel {
         playLists;
     }
 
+    public enum CrawledStatus{
+        crawled,
+        notCrawled;
+    }
+
     private String url;
     private String title;
     private PageType type;
-    private Boolean isCrawled;
+    private CrawledStatus status;
     private String html;
 
 }
