@@ -1,8 +1,5 @@
 package com.utopia.model;
 
-import com.sun.webkit.WebPage;
-import sun.jvm.hotspot.debugger.Page;
-
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
@@ -12,12 +9,12 @@ public class WebPageModel {
     public enum PageType{
         song,
         playList,
-        playLists;
+        playLists,
     }
 
     public enum CrawledStatus{
         crawled,
-        notCrawled;
+        notCrawled,
     }
 
     @Id
