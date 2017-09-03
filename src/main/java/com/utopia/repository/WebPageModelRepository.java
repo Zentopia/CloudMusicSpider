@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 
 
 public interface WebPageRepository extends JpaRepository<WebPageModel, String>{
+
     WebPageModel findTopByStatus(CrawledStatus status);
 
     @Modifying
