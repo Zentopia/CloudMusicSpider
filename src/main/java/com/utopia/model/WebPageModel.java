@@ -9,12 +9,12 @@ public class WebPageModel {
     public enum PageType{
         song,
         playList,
-        playLists,
+        playLists
     }
 
     public enum CrawledStatus{
         crawled,
-        notCrawled,
+        notCrawled
     }
 
     @Id
