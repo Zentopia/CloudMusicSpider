@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class CrawlerService {
 
     private final CacheManager cacheManager;
-    private final String cacheName = "com.tianmaying.SongModels";
+    private final String cacheName = "com.utopia.SongModels";
     public static final Integer MAX_THREADS = 20;
     @Autowired SongModelRepository SongModelRepository;
     @Autowired WebPageModelRepository WebPageModelRepository;
