@@ -1,0 +1,17 @@
+key: dscfjnadsjnvlj
+
+spring:
+    jpa:
+        database: MYSQL
+        hibernate:
+            ddl-auto: update
+
+    datasource:
+        url: jdbc:mysql://127.0.0.1:3306/spider?useSSL=false
+        username: root
+        password: 123456
+        driver-class-name: com.mysql.jdbc.Driver
+
+server:
+  port: 8080
+  tomcat.uri-encoding: UTF-8
