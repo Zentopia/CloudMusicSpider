@@ -36,12 +36,14 @@ public class CrawlerThread implements Runnable{
         }
     }
 
+    //抓取网页
     private boolean fetchHtml(WebPageModel webPageModel) throws IOException {
         Connection.Response response = Jsoup.connect(webPageModel.getUrl()).timeout(3000).execute();
         webPageModel.setHtml(response.body());
         return response.statusCode() / 100 == 2;
     }
 
+    //解析网页
     private void parse(WebPageModel webPageModel) throws Exception {
         if (PageType.playLists.equals(webPageModel.getType()))
             parsePlaylists(webPageModel).forEach(page -> crawlerService.savePage(page));

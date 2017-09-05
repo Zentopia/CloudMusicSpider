@@ -21,22 +21,12 @@ public class CrawlerController {
     @Autowired
     private CrawlerService crawlerService;
 
-    @Value("${key}")
-    private String key;
-
-    @ModelAttribute
-    public void AuthConfig(@RequestParam String auth) throws AccessException {
-        if(!key.equals(auth)) {
-            throw new AccessException("auth failed");
-        }
-    }
-
     @GetMapping("/init")
     public void init() {
         crawlerService.init();
     }
 
-    @GetMapping("/crawl")
+    @GetMapping("/run")
     public void crawl() throws InterruptedException {
         crawlerService.crawl();
     }
