@@ -19,10 +19,12 @@ import javax.transaction.Transactional;
 @Repository
 public interface WebPageModelRepository extends JpaRepository<WebPageModel, String>{
 
-    WebPageModel findTopByStatus(CrawledStatus status);
+    //通过状态来查询
+    public WebPageModel findTopByStatus(CrawledStatus status);
 
     @Modifying
     @Transactional
     @Query("update WebPageModel w set w.status = ?1")
     void resetStatus(CrawledStatus status);
+
 }

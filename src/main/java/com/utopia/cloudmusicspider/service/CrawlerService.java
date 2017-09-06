@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,40 +32,45 @@ public class CrawlerService {
     private final String cacheName = "com.utopia.SongModels";
 
     private static final Integer MAX_THREADS = 20;
-    @Autowired SongModelRepository SongModelRepository;
-    @Autowired WebPageModelRepository WebPageModelRepository;
+    @Autowired
+    SongModelRepository songModelRepository;
+    @Autowired
+    WebPageModelRepository webPageModelRepository;
 
     public CrawlerService() {
         cacheManager = CacheManager.getInstance();
     }
 
     public WebPageModel savePage(WebPageModel webPageModel) {
-        WebPageModel result = WebPageModelRepository.findOne(webPageModel.getUrl());
-        return result == null ? WebPageModelRepository.saveAndFlush(webPageModel) : result;
+        WebPageModel result = webPageModelRepository.findOne(webPageModel.getUrl());
+        return result == null ? webPageModelRepository.saveAndFlush(webPageModel) : result;
     }
 
     public SongModel saveSongModel(SongModel songModel) {
-        SongModel result = SongModelRepository.findOne(songModel.getUrl());
+        SongModel result = songModelRepository.findOne(songModel.getUrl());
         if(result == null) {
-            result = SongModelRepository.saveAndFlush(songModel);
+            result = songModelRepository.saveAndFlush(songModel);
         } else {
             result.setCommentCount(songModel.getCommentCount());
-            result = SongModelRepository.saveAndFlush(result);
+            result = songModelRepository.saveAndFlush(result);
         }
         return result;
     }
 
     public WebPageModel update(WebPageModel WebPageModel) {
-        return WebPageModelRepository.save(WebPageModel);
+        return webPageModelRepository.save(WebPageModel);
     }
 
     public void reset() {
-        WebPageModelRepository.resetStatus(CrawledStatus.notCrawled);
+        webPageModelRepository.resetStatus(CrawledStatus.notCrawled);
     }
 
     public synchronized WebPageModel getUnCrawlPage() {
-        // 返回未爬页面
-        return null;
+
+        WebPageModel webPageModel = webPageModelRepository.findTopByStatus(CrawledStatus.notCrawled);
+        webPageModel.setStatus(CrawledStatus.crawled);
+        update(webPageModel);
+        return webPageModel;
     }
 
     private void init(String category) {
@@ -80,7 +84,7 @@ public class CrawlerService {
 
     @Async
     public void init() {
-        WebPageModelRepository.deleteAll();
+        webPageModelRepository.deleteAll();
 
         List<String> categoryList = new ArrayList<>(Arrays.asList(
                 "全部", "华语", "欧美", "日语", "韩语", "粤语", "小语种", "流行",
@@ -114,11 +118,11 @@ public class CrawlerService {
 
     @Async
     public void update() throws InterruptedException {
-        List<SongModel> WebPageModels = SongModelRepository.findByCommentCountGreaterThan(5000L);
+        List<SongModel> WebPageModels = songModelRepository.findByCommentCountGreaterThan(5000L);
         WebPageModels.forEach(s -> {
-            WebPageModel p = WebPageModelRepository.findOne(s.getUrl());
+            WebPageModel p = webPageModelRepository.findOne(s.getUrl());
             p.setStatus(CrawledStatus.notCrawled);
-            WebPageModelRepository.save(p);
+            webPageModelRepository.save(p);
 
         });
         crawl();
