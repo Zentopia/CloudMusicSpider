@@ -5,9 +5,13 @@ import com.utopia.cloudmusicspider.model.WebPageModel;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CrawlerThread implements Runnable{
 
@@ -55,7 +59,11 @@ public class CrawlerThread implements Runnable{
 
     private List<WebPageModel> parsePlaylists(WebPageModel webPage) {
         // 解析歌单列表页面
+        Document doc = Jsoup.parse(webPage.getHtml());
+        Element element = doc.getElementsByClass("m-cvrlst f-cb").first();
+
         return null;
+//        return songs.stream().map(e -> new WebPageModel(BASE_URL + e.attr("href"), PageType.song, e.html())).collect(Collectors.toList());
     }
 
     private List<WebPageModel> parsePlaylist(WebPageModel webPage) {

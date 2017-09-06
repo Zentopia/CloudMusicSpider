@@ -11,6 +11,7 @@ import net.sf.ehcache.Ehcache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
+import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,12 +70,14 @@ public class CrawlerService {
 
         WebPageModel webPageModel = webPageModelRepository.findTopByStatus(CrawledStatus.notCrawled);
         webPageModel.setStatus(CrawledStatus.crawled);
-        update(webPageModel);
+        // TODO: 2017/9/6
+
+//        update(webPageModel);
         return webPageModel;
     }
 
     private void init(String category) {
-        String basePlayListUrl = "http://music.163.com/#/discover/playlist/?order=hot&cat=";
+        String basePlayListUrl = "http://music.163.com/#/discover/playlist/?cat=";
 
         String url = basePlayListUrl + category;
         PageType pageType = PageType.playLists;
