@@ -2,6 +2,7 @@ package com.utopia.cloudmusicspider.service;
 
 import com.utopia.cloudmusicspider.model.SongModel;
 import com.utopia.cloudmusicspider.model.WebPageModel;
+import com.utopia.cloudmusicspider.model.WebPageModel.CrawledStatus;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -10,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,12 +60,22 @@ public class CrawlerThread implements Runnable{
     }
 
     private List<WebPageModel> parsePlaylists(WebPageModel webPage) {
-        // todo 解析歌单列表页面
-        Document doc = Jsoup.parse(webPage.getHtml());
-        Element element = doc.getElementsByClass("m-cvrlst f-cb").first();
 
-        return null;
-//        return songs.stream().map(e -> new WebPageModel(BASE_URL + e.attr("href"), PageType.song, e.html())).collect(Collectors.toList());
+        Document doc = Jsoup.parse(webPage.getHtml());
+        Elements elements = doc.select("p.dec");
+        String playListBaseUrl = "http://music.163.com";
+        List<WebPageModel> playLists = new ArrayList<WebPageModel>();
+
+        for (Element element : elements) {
+            Element subElement = element.select("a").first();
+            String title = subElement.attr("title");
+            String playListsUrl = playListBaseUrl + subElement.attr("href");
+
+            WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, PageType.playList, title);
+            playLists.add(playListWebPageModel);
+        }
+
+        return playLists;
     }
 
     private List<WebPageModel> parsePlaylist(WebPageModel webPage) {
