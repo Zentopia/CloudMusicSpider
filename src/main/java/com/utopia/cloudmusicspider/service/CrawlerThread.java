@@ -62,7 +62,7 @@ public class CrawlerThread implements Runnable{
 
         do {
             //http://music.163.com/#/discover/playlist/?order=hot&cat=%E5%8D%8E%E8%AF%AD351375
-            String url = String.format("%s&limit=%d&offset=", webPageModel.getUrl(), limit, offset);
+            String url = String.format("%s&limit=%d&offset=%d", webPageModel.getUrl(), limit, offset);
             Connection.Response response = Jsoup.connect(url).timeout(3000).execute();
             webPageModel.setHtml(response.body());
 
@@ -70,16 +70,21 @@ public class CrawlerThread implements Runnable{
                 Document doc = Jsoup.parse(webPageModel.getHtml());
                 Elements elements = doc.select("p.dec");
                 String playListBaseUrl = "http://music.163.com";
+                Elements listenerNums = doc.select("span.nb");
+                elementNum = elements.size();
 
-                for (Element element : elements) {
-                    Element subElement = element.select("a").first();
-                    String title = subElement.attr("title");
+
+                for (int i = 0; i < elementNum; i++) {
+                    Element albumElement = elements.get(i);
+                    Element listenerNumsElement = listenerNums.get(i);
+                    Element subElement = albumElement.select("a").first();
+                    String albumTitle = subElement.attr("title");
                     String playListsUrl = playListBaseUrl + subElement.attr("href");
-                    WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, PageType.playList, title);
+                    String listenerNum = listenerNumsElement.text();
+                    WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, albumTitle, listenerNum, PageType.playList);
                     playLists.add(playListWebPageModel);
                 }
 
-                elementNum = elements.size();
                 offset = offset + limit;
             }
 

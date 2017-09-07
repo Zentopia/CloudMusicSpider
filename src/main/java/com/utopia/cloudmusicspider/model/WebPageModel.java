@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 @Entity
 public class WebPageModel {
+
     public enum PageType{
         song,
         playList,
@@ -18,6 +19,15 @@ public class WebPageModel {
     @Id
     private String url;
     private String title;
+    private String listenerNum;
+
+    public String getListenerNum() {
+        return listenerNum;
+    }
+
+    public void setListenerNum(String listenerNum) {
+        this.listenerNum = listenerNum;
+    }
 
     @Enumerated(EnumType.STRING)
     private PageType type;
@@ -45,6 +55,14 @@ public class WebPageModel {
         this.type = type;
         this.title = title;
         this.status = CrawledStatus.notCrawled;
+    }
+
+    public WebPageModel(String url, String title, String listenerNum, PageType type) {
+        this.url = url;
+        this.title = title;
+        this.listenerNum = listenerNum;
+        this.type = type;
+        this.status = CrawledStatus.crawled;
     }
 
     public String getUrl() {
