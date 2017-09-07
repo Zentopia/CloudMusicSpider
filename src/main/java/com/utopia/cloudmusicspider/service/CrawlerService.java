@@ -70,9 +70,7 @@ public class CrawlerService {
 
         WebPageModel webPageModel = webPageModelRepository.findTopByStatus(CrawledStatus.notCrawled);
         webPageModel.setStatus(CrawledStatus.crawled);
-        // todo 取消注释
-
-//        update(webPageModel);
+        update(webPageModel);
         return webPageModel;
     }
 

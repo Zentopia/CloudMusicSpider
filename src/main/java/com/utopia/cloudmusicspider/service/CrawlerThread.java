@@ -2,7 +2,6 @@ package com.utopia.cloudmusicspider.service;
 
 import com.utopia.cloudmusicspider.model.SongModel;
 import com.utopia.cloudmusicspider.model.WebPageModel;
-import com.utopia.cloudmusicspider.model.WebPageModel.CrawledStatus;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -13,7 +12,6 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CrawlerThread implements Runnable{
 
@@ -46,14 +44,14 @@ public class CrawlerThread implements Runnable{
 
     private void scrachData(WebPageModel webPageModel) throws Exception {
         if (PageType.playLists.equals(webPageModel.getType()))
-            parsePlaylists(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
-//        if (PageType.playList.equals(webPageModel.getType()))
-//            parsePlaylist(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
+            parsePlayLists(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
+        if (PageType.playList.equals(webPageModel.getType()))
+            parsePlaylist(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
 //        if (PageType.song.equals(webPageModel.getType()))
 //            crawlerService.saveSongModel(parseSong(webPageModel));
     }
 
-    private List<WebPageModel> parsePlaylists(WebPageModel webPageModel) throws IOException {
+    private List<WebPageModel> parsePlayLists(WebPageModel webPageModel) throws IOException {
 
         int limit = 35;
         int offset = 0;
@@ -91,9 +89,16 @@ public class CrawlerThread implements Runnable{
         return playLists;
     }
 
-    private List<WebPageModel> parsePlaylist(WebPageModel webPage) {
-        //解析歌单页面
-        return null;
+    private List<WebPageModel> parsePlaylist(WebPageModel webPageModel) {
+        String url = webPageModel.getUrl();
+        Connection.Response response = null;
+        try {
+            response = Jsoup.connect(url).timeout(3000).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        webPageModel.setHtml(response.body());
+
     }
 
     private SongModel parseSong(WebPageModel webPage) throws Exception {
