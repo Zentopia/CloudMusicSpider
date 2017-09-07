@@ -46,11 +46,11 @@ public class CrawlerThread implements Runnable{
 
     private void scrachData(WebPageModel webPageModel) throws Exception {
         if (PageType.playLists.equals(webPageModel.getType()))
-            parsePlaylists(webPageModel).forEach(page -> crawlerService.savePage(page));
-        if (PageType.playList.equals(webPageModel.getType()))
-            parsePlaylist(webPageModel).forEach(page -> crawlerService.savePage(page));
-        if (PageType.song.equals(webPageModel.getType()))
-            crawlerService.saveSongModel(parseSong(webPageModel));
+            parsePlaylists(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
+//        if (PageType.playList.equals(webPageModel.getType()))
+//            parsePlaylist(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
+//        if (PageType.song.equals(webPageModel.getType()))
+//            crawlerService.saveSongModel(parseSong(webPageModel));
     }
 
     private List<WebPageModel> parsePlaylists(WebPageModel webPageModel) throws IOException {
@@ -61,7 +61,6 @@ public class CrawlerThread implements Runnable{
         List<WebPageModel> playLists = new ArrayList<WebPageModel>();
 
         do {
-            //http://music.163.com/#/discover/playlist/?order=hot&cat=%E5%8D%8E%E8%AF%AD351375
             String url = String.format("%s&limit=%d&offset=%d", webPageModel.getUrl(), limit, offset);
             Connection.Response response = Jsoup.connect(url).timeout(3000).execute();
             webPageModel.setHtml(response.body());
@@ -72,7 +71,6 @@ public class CrawlerThread implements Runnable{
                 String playListBaseUrl = "http://music.163.com";
                 Elements listenerNums = doc.select("span.nb");
                 elementNum = elements.size();
-
 
                 for (int i = 0; i < elementNum; i++) {
                     Element albumElement = elements.get(i);
