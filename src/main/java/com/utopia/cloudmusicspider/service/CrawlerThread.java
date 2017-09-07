@@ -42,7 +42,7 @@ public class CrawlerThread implements Runnable{
 
     //抓取网页
     private boolean fetchHtml(WebPageModel webPageModel) throws IOException {
-        Connection.Response response = Jsoup.connect(webPageModel.getUrl()).timeout(3000).execute();
+        Connection.Response response = Jsoup.connect("http://music.163.com/discover/playlist/?cat=00后").timeout(3000).execute();
         webPageModel.setHtml(response.body());
         return response.statusCode() / 100 == 2;
     }
@@ -58,7 +58,7 @@ public class CrawlerThread implements Runnable{
     }
 
     private List<WebPageModel> parsePlaylists(WebPageModel webPage) {
-        // 解析歌单列表页面
+        // todo 解析歌单列表页面
         Document doc = Jsoup.parse(webPage.getHtml());
         Element element = doc.getElementsByClass("m-cvrlst f-cb").first();
 

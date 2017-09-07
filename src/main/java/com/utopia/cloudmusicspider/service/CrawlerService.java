@@ -70,14 +70,14 @@ public class CrawlerService {
 
         WebPageModel webPageModel = webPageModelRepository.findTopByStatus(CrawledStatus.notCrawled);
         webPageModel.setStatus(CrawledStatus.crawled);
-        // TODO: 2017/9/6
+        // todo 取消注释
 
 //        update(webPageModel);
         return webPageModel;
     }
 
     private void init(String category) {
-        String basePlayListUrl = "http://music.163.com/#/discover/playlist/?cat=";
+        String basePlayListUrl = "http://music.163.com/discover/playlist/?cat=";
 
         String url = basePlayListUrl + category;
         PageType pageType = PageType.playLists;
