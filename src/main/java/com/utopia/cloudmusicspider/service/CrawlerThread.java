@@ -35,22 +35,16 @@ public class CrawlerThread implements Runnable{
             WebPageModel webPageModel = crawlerService.getUnCrawlPage(); // TODO: 更好的退出机制
             if (webPageModel == null)
                 return; // 拿不到url，说明没有需要爬的url，直接退出
+
             try {
-                if (fetchHtml(webPageModel))
-                    parse(webPageModel); // TODO: 如果获取页面失败，考虑重连机制，这里继续爬下个页面
-            } catch (Exception e) { }
+                scrachData(webPageModel);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    //抓取网页
-    private boolean fetchHtml(WebPageModel webPageModel) throws IOException {
-        Connection.Response response = Jsoup.connect("http://music.163.com/discover/playlist/?cat=00后").timeout(3000).execute();
-        webPageModel.setHtml(response.body());
-        return response.statusCode() / 100 == 2;
-    }
-
-    //解析网页
-    private void parse(WebPageModel webPageModel) throws Exception {
+    private void scrachData(WebPageModel webPageModel) throws Exception {
         if (PageType.playLists.equals(webPageModel.getType()))
             parsePlaylists(webPageModel).forEach(page -> crawlerService.savePage(page));
         if (PageType.playList.equals(webPageModel.getType()))
@@ -59,21 +53,37 @@ public class CrawlerThread implements Runnable{
             crawlerService.saveSongModel(parseSong(webPageModel));
     }
 
-    private List<WebPageModel> parsePlaylists(WebPageModel webPage) {
+    private List<WebPageModel> parsePlaylists(WebPageModel webPageModel) throws IOException {
 
-        Document doc = Jsoup.parse(webPage.getHtml());
-        Elements elements = doc.select("p.dec");
-        String playListBaseUrl = "http://music.163.com";
+        int limit = 35;
+        int offset = 0;
+        int elementNum = 0;
         List<WebPageModel> playLists = new ArrayList<WebPageModel>();
 
-        for (Element element : elements) {
-            Element subElement = element.select("a").first();
-            String title = subElement.attr("title");
-            String playListsUrl = playListBaseUrl + subElement.attr("href");
+        do {
+            //http://music.163.com/#/discover/playlist/?order=hot&cat=%E5%8D%8E%E8%AF%AD351375
+            String url = String.format("%s&limit=%d&offset=", webPageModel.getUrl(), limit, offset);
+            Connection.Response response = Jsoup.connect(url).timeout(3000).execute();
+            webPageModel.setHtml(response.body());
 
-            WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, PageType.playList, title);
-            playLists.add(playListWebPageModel);
-        }
+            if (response.statusCode() / 100 == 2) {
+                Document doc = Jsoup.parse(webPageModel.getHtml());
+                Elements elements = doc.select("p.dec");
+                String playListBaseUrl = "http://music.163.com";
+
+                for (Element element : elements) {
+                    Element subElement = element.select("a").first();
+                    String title = subElement.attr("title");
+                    String playListsUrl = playListBaseUrl + subElement.attr("href");
+                    WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, PageType.playList, title);
+                    playLists.add(playListWebPageModel);
+                }
+
+                elementNum = elements.size();
+                offset = offset + limit;
+            }
+
+        } while (elementNum > 0);
 
         return playLists;
     }
