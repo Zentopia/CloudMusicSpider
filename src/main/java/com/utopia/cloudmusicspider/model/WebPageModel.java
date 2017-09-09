@@ -6,7 +6,6 @@ import javax.persistence.*;
 public class WebPageModel {
 
     public enum PageType{
-        song,
         playList,
         playLists
     }

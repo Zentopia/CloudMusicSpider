@@ -4,19 +4,19 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class SongModel {
+public class Song {
 
     @Id
     private String url;
     private String title;
     private Long commentCount;
 
-    public SongModel(){
+    public Song(){
         super();
 
     }
 
-    public SongModel(String url, String title, Long commentCount) {
+    public Song(String url, String title, Long commentCount) {
         this.url = url;
         this.title = title;
         this.commentCount = commentCount;

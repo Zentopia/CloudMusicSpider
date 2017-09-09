@@ -1,9 +1,11 @@
 package com.utopia.cloudmusicspider.service;
 
-import com.utopia.cloudmusicspider.model.SongModel;
+import com.utopia.cloudmusicspider.model.AlbumCategory;
+import com.utopia.cloudmusicspider.model.BaseModel;
+import com.utopia.cloudmusicspider.model.Song;
 import com.utopia.cloudmusicspider.model.WebPageModel;
-import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import com.utopia.cloudmusicspider.model.WebPageModel.CrawledStatus;
+import com.utopia.cloudmusicspider.repository.AlbumCategoryRepository;
 import com.utopia.cloudmusicspider.repository.WebPageModelRepository;
 import com.utopia.cloudmusicspider.repository.SongModelRepository;
 import net.sf.ehcache.CacheManager;
@@ -11,7 +13,6 @@ import net.sf.ehcache.Ehcache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
-import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,55 +38,61 @@ public class CrawlerService {
     SongModelRepository songModelRepository;
     @Autowired
     WebPageModelRepository webPageModelRepository;
+    @Autowired
+    AlbumCategoryRepository albumCategoryRepository;
 
     public CrawlerService() {
         cacheManager = CacheManager.getInstance();
     }
 
-    public WebPageModel savePage(WebPageModel webPageModel) {
-        WebPageModel result = webPageModelRepository.findOne(webPageModel.getUrl());
-        return result == null ? webPageModelRepository.saveAndFlush(webPageModel) : result;
+    public AlbumCategory saveAlumCategory(AlbumCategory albumCategory){
+        AlbumCategory result = albumCategoryRepository.findOne(albumCategory.getUrl());
+        return result == null ? albumCategoryRepository.saveAndFlush(albumCategory) : result;
     }
 
-    public SongModel saveSongModel(SongModel songModel) {
-        SongModel result = songModelRepository.findOne(songModel.getUrl());
+    public Song saveSongModel(Song song) {
+        Song result = songModelRepository.findOne(song.getUrl());
         if(result == null) {
-            result = songModelRepository.saveAndFlush(songModel);
+            result = songModelRepository.saveAndFlush(song);
         } else {
-            result.setCommentCount(songModel.getCommentCount());
+            result.setCommentCount(song.getCommentCount());
             result = songModelRepository.saveAndFlush(result);
         }
         return result;
     }
 
-    public WebPageModel update(WebPageModel WebPageModel) {
-        return webPageModelRepository.save(WebPageModel);
+    public AlbumCategory updateAlbumCategory(AlbumCategory albumCategory) {
+        return albumCategoryRepository.save(albumCategory);
     }
 
     public void reset() {
         webPageModelRepository.resetStatus(CrawledStatus.notCrawled);
     }
 
-    public synchronized WebPageModel getUnCrawlPage() {
+    public synchronized BaseModel getUnCrawlPage() {
 
-        WebPageModel webPageModel = webPageModelRepository.findTopByStatus(CrawledStatus.notCrawled);
-        webPageModel.setStatus(CrawledStatus.crawled);
-        update(webPageModel);
-        return webPageModel;
+        BaseModel baseModel = albumCategoryRepository.findTopByStatus(AlbumCategory.CrawledStatus.notCrawled);
+        if (baseModel == null){
+
+        } else {
+            ((AlbumCategory)baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
+            updateAlbumCategory((AlbumCategory) baseModel);
+        }
+
+        return baseModel;
     }
 
     private void init(String category) {
         String basePlayListUrl = "http://music.163.com/discover/playlist/?cat=";
-
         String url = basePlayListUrl + category;
-        PageType pageType = PageType.playLists;
-        WebPageModel webPageModel = new WebPageModel(url, pageType, category);
-        savePage(webPageModel);
+        AlbumCategory albumCategory = new AlbumCategory(url, category);
+        saveAlumCategory(albumCategory);
     }
 
     @Async
     public void init() {
-        webPageModelRepository.deleteAll();
+        //清理数据
+        albumCategoryRepository.deleteAll();
 
         List<String> categoryList = new ArrayList<>(Arrays.asList(
                 "全部", "华语", "欧美", "日语", "韩语", "粤语", "小语种", "流行",
@@ -119,7 +126,7 @@ public class CrawlerService {
 
     @Async
     public void update() throws InterruptedException {
-        List<SongModel> WebPageModels = songModelRepository.findByCommentCountGreaterThan(5000L);
+        List<Song> WebPageModels = songModelRepository.findByCommentCountGreaterThan(5000L);
         WebPageModels.forEach(s -> {
             WebPageModel p = webPageModelRepository.findOne(s.getUrl());
             p.setStatus(CrawledStatus.notCrawled);

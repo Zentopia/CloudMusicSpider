@@ -1,6 +1,6 @@
 package com.utopia.cloudmusicspider.service;
 
-import com.utopia.cloudmusicspider.model.SongModel;
+import com.utopia.cloudmusicspider.model.Song;
 import com.utopia.cloudmusicspider.model.WebPageModel;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
@@ -30,25 +30,20 @@ public class CrawlerThread implements Runnable{
     @Override
     public void run() {
         while (true) {
-            WebPageModel webPageModel = crawlerService.getUnCrawlPage(); // TODO: 更好的退出机制
-            if (webPageModel == null)
-                return; // 拿不到url，说明没有需要爬的url，直接退出
-
-            try {
-                scrachData(webPageModel);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            WebPageModel webPageModel = crawlerService.getUnCrawlPage(); // TODO: 更好的退出机制
+//            if (webPageModel == null)
+//                return; // 拿不到url，说明没有需要爬的url，直接退出
+//
+//            try {
+//                scrachData(webPageModel);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
     private void scrachData(WebPageModel webPageModel) throws Exception {
-        if (PageType.playLists.equals(webPageModel.getType()))
-            parsePlayLists(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
-        if (PageType.playList.equals(webPageModel.getType()))
-            parsePlaylist(webPageModel).forEach(webPage -> crawlerService.savePage(webPage));
-//        if (PageType.song.equals(webPageModel.getType()))
-//            crawlerService.saveSongModel(parseSong(webPageModel));
+
     }
 
     private List<WebPageModel> parsePlayLists(WebPageModel webPageModel) throws IOException {
@@ -98,10 +93,10 @@ public class CrawlerThread implements Runnable{
             e.printStackTrace();
         }
         webPageModel.setHtml(response.body());
-
+        return null;
     }
 
-    private SongModel parseSong(WebPageModel webPage) throws Exception {
+    private Song parseSong(WebPageModel webPage) throws Exception {
         // 解析歌曲页面
         return null;
     }
