@@ -6,19 +6,29 @@ import java.util.Set;
 @Entity
 public class Album extends BaseModel{
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
+
     private String name;
+    private String url;
+    private String audienceNum;
 
     @ManyToOne
     @JoinColumn(name = "album_category_id")
     private AlbumCategory albumCategory;
 
-    private String url;
 
     //构造方法
     public Album() {
 
+    }
+
+    public Album(String id, String name, String url, String audienceNum, AlbumCategory albumCategory) {
+        this.id = id;
+        this.name = name;
+        this.url = url;
+        this.audienceNum = audienceNum;
+        this.albumCategory = albumCategory;
     }
 
     public String getId(){
@@ -51,5 +61,13 @@ public class Album extends BaseModel{
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getAudienceNum() {
+        return audienceNum;
+    }
+
+    public void setAudienceNum(String audienceNum) {
+        this.audienceNum = audienceNum;
     }
 }
