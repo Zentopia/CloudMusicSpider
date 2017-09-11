@@ -1,7 +1,6 @@
 package com.utopia.cloudmusicspider.service;
 
-import com.utopia.cloudmusicspider.model.Song;
-import com.utopia.cloudmusicspider.model.WebPageModel;
+import com.utopia.cloudmusicspider.model.*;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -30,50 +29,57 @@ public class CrawlerThread implements Runnable{
     @Override
     public void run() {
         while (true) {
-//            WebPageModel webPageModel = crawlerService.getUnCrawlPage(); // TODO: 更好的退出机制
-//            if (webPageModel == null)
-//                return; // 拿不到url，说明没有需要爬的url，直接退出
-//
-//            try {
-//                scrachData(webPageModel);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            BaseModel webPageModel = crawlerService.getUnCrawlPage(); // TODO: 更好的退出机制
+            if (webPageModel == null)
+                return; // 拿不到url，说明没有需要爬的url，直接退出
+
+            try {
+                scrachData(webPageModel);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void scrachData(WebPageModel webPageModel) throws Exception {
-
+    private void scrachData(BaseModel webPageModel) throws Exception {
+        if (webPageModel instanceof AlbumCategory) {
+            parseAlbumCategory((AlbumCategory) webPageModel);
+        }
     }
 
-    private List<WebPageModel> parsePlayLists(WebPageModel webPageModel) throws IOException {
+    private List<Album> parseAlbumCategory(AlbumCategory albumCategory) throws IOException {
 
         int limit = 35;
         int offset = 0;
         int elementNum = 0;
-        List<WebPageModel> playLists = new ArrayList<WebPageModel>();
+        List<Album> albums = new ArrayList<Album>();
 
         do {
-            String url = String.format("%s&limit=%d&offset=%d", webPageModel.getUrl(), limit, offset);
+            String url = String.format("%s&limit=%d&offset=%d", albumCategory.getUrl(), limit, offset);
             Connection.Response response = Jsoup.connect(url).timeout(3000).execute();
-            webPageModel.setHtml(response.body());
+            albumCategory.setHtml(response.body());
 
             if (response.statusCode() / 100 == 2) {
-                Document doc = Jsoup.parse(webPageModel.getHtml());
+                Document doc = Jsoup.parse(albumCategory.getHtml());
                 Elements elements = doc.select("p.dec");
                 String playListBaseUrl = "http://music.163.com";
                 Elements listenerNums = doc.select("span.nb");
                 elementNum = elements.size();
+                Elements bottomElements = doc.select("a.icon-play.f-fr");
 
                 for (int i = 0; i < elementNum; i++) {
+
                     Element albumElement = elements.get(i);
                     Element listenerNumsElement = listenerNums.get(i);
+                    Element bottomElement = bottomElements.get(i);
+                    String albumID = bottomElement.attr("data-res-id");
                     Element subElement = albumElement.select("a").first();
-                    String albumTitle = subElement.attr("title");
-                    String playListsUrl = playListBaseUrl + subElement.attr("href");
-                    String listenerNum = listenerNumsElement.text();
-                    WebPageModel playListWebPageModel = new WebPageModel(playListsUrl, albumTitle, listenerNum, PageType.playList);
-                    playLists.add(playListWebPageModel);
+                    String albumName = subElement.attr("title");
+                    String albumUrl = playListBaseUrl + subElement.attr("href");
+                    String audienceNum = listenerNumsElement.text();
+                    Album album = new Album(albumID, albumName, albumUrl, audienceNum, albumCategory);
+                    crawlerService.savaAlbum(album);
+                    albums.add(album);
                 }
 
                 offset = offset + limit;
@@ -81,7 +87,7 @@ public class CrawlerThread implements Runnable{
 
         } while (elementNum > 0);
 
-        return playLists;
+        return albums;
     }
 
     private List<WebPageModel> parsePlaylist(WebPageModel webPageModel) {
