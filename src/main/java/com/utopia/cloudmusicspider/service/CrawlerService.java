@@ -1,15 +1,12 @@
 package com.utopia.cloudmusicspider.service;
 
-import com.utopia.cloudmusicspider.model.AlbumCategory;
-import com.utopia.cloudmusicspider.model.BaseModel;
-import com.utopia.cloudmusicspider.model.Song;
-import com.utopia.cloudmusicspider.model.WebPageModel;
+import com.utopia.cloudmusicspider.model.*;
 import com.utopia.cloudmusicspider.model.WebPageModel.CrawledStatus;
 import com.utopia.cloudmusicspider.repository.AlbumCategoryRepository;
+import com.utopia.cloudmusicspider.repository.AlbumRepository;
 import com.utopia.cloudmusicspider.repository.WebPageModelRepository;
 import com.utopia.cloudmusicspider.repository.SongModelRepository;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Ehcache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
@@ -37,17 +34,23 @@ public class CrawlerService {
     @Autowired
     SongModelRepository songModelRepository;
     @Autowired
-    WebPageModelRepository webPageModelRepository;
+    AlbumRepository albumRepository;
     @Autowired
     AlbumCategoryRepository albumCategoryRepository;
+
 
     public CrawlerService() {
         cacheManager = CacheManager.getInstance();
     }
 
-    public AlbumCategory saveAlumCategory(AlbumCategory albumCategory){
+    public AlbumCategory saveAlbumCategory(AlbumCategory albumCategory) {
         AlbumCategory result = albumCategoryRepository.findOne(albumCategory.getUrl());
         return result == null ? albumCategoryRepository.saveAndFlush(albumCategory) : result;
+    }
+
+    public synchronized Album savaAlbum(Album album) {
+        Album result = albumRepository.findOne(album.getId());
+        return result == null ? albumRepository.saveAndFlush(album) : result;
     }
 
     public Song saveSongModel(Song song) {
@@ -65,18 +68,18 @@ public class CrawlerService {
         return albumCategoryRepository.save(albumCategory);
     }
 
-    public void reset() {
-        webPageModelRepository.resetStatus(CrawledStatus.notCrawled);
-    }
 
     public synchronized BaseModel getUnCrawlPage() {
 
         BaseModel baseModel = albumCategoryRepository.findTopByStatus(AlbumCategory.CrawledStatus.notCrawled);
-        if (baseModel == null){
+        if (baseModel != null) {
+            if (baseModel instanceof AlbumCategory) {
+//                ((AlbumCategory)baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
+//                updateAlbumCategory((AlbumCategory) baseModel);
+            } else {
 
-        } else {
-            ((AlbumCategory)baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
-            updateAlbumCategory((AlbumCategory) baseModel);
+            }
+
         }
 
         return baseModel;
@@ -86,7 +89,7 @@ public class CrawlerService {
         String basePlayListUrl = "http://music.163.com/discover/playlist/?cat=";
         String url = basePlayListUrl + category;
         AlbumCategory albumCategory = new AlbumCategory(url, category);
-        saveAlumCategory(albumCategory);
+        saveAlbumCategory(albumCategory);
     }
 
     @Async
@@ -120,20 +123,9 @@ public class CrawlerService {
         }
         executorService.shutdown();
         executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-        Ehcache ehcache = cacheManager.getEhcache(cacheName);
-        ehcache.removeAll();
+//        Ehcache ehcache = cacheManager.getEhcache(cacheName);
+//        ehcache.removeAll();
     }
 
-    @Async
-    public void update() throws InterruptedException {
-        List<Song> WebPageModels = songModelRepository.findByCommentCountGreaterThan(5000L);
-        WebPageModels.forEach(s -> {
-            WebPageModel p = webPageModelRepository.findOne(s.getUrl());
-            p.setStatus(CrawledStatus.notCrawled);
-            webPageModelRepository.save(p);
-
-        });
-        crawl();
-    }
 
 }
