@@ -16,6 +16,7 @@ public class AlbumCategory extends BaseModel{
 
     private String title;
 
+    @OneToMany(mappedBy = "albumCategory", cascade = CascadeType.ALL)
     private Set<Album> albums;
 
     @Enumerated(EnumType.STRING)
@@ -72,7 +73,6 @@ public class AlbumCategory extends BaseModel{
         return albums;
     }
 
-    @OneToMany(mappedBy = "albumCategory", cascade = CascadeType.ALL)
     public void setAlbums(Set<Album> albums) {
         this.albums = albums;
     }

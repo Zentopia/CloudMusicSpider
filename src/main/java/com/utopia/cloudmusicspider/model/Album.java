@@ -5,7 +5,8 @@ import java.util.Set;
 
 @Entity
 public class Album extends BaseModel{
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
     private String name;
 
@@ -20,8 +21,6 @@ public class Album extends BaseModel{
 
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     public String getId(){
         return id;
     }
