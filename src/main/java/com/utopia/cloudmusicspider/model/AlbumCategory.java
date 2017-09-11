@@ -14,7 +14,7 @@ public class AlbumCategory extends BaseModel{
     @Id
     private String url;
 
-    private String title;
+    private String name;
 
     @OneToMany(mappedBy = "albumCategory", cascade = CascadeType.ALL)
     private Set<Album> albums;
@@ -30,9 +30,9 @@ public class AlbumCategory extends BaseModel{
         super();
     }
 
-    public AlbumCategory(String url, String title) {
+    public AlbumCategory(String url, String name) {
         this.url = url;
-        this.title = title;
+        this.name = name;
         this.status = CrawledStatus.notCrawled;
     }
 
@@ -45,12 +45,12 @@ public class AlbumCategory extends BaseModel{
         this.url = url;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public CrawledStatus getStatus() {
