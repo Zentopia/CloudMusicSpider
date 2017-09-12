@@ -10,7 +10,9 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CrawlerThread implements Runnable{
 
@@ -77,8 +79,12 @@ public class CrawlerThread implements Runnable{
                     String albumName = subElement.attr("title");
                     String albumUrl = playListBaseUrl + subElement.attr("href");
                     String audienceNum = listenerNumsElement.text();
-                    Album album = new Album(albumID, albumName, albumUrl, audienceNum, albumCategory);
-                    crawlerService.savaAlbum(album);
+
+                    Set<AlbumCategory> albumCategories = new HashSet<AlbumCategory>();
+                    albumCategories.add(albumCategory);
+
+                    Album album = new Album(albumID, albumName, albumUrl, audienceNum, albumCategories);
+                    crawlerService.saveAlbum(album);
                     albums.add(album);
                 }
 

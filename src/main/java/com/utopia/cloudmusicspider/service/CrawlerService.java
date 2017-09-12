@@ -47,9 +47,38 @@ public class CrawlerService {
         return result == null ? albumCategoryRepository.saveAndFlush(albumCategory) : result;
     }
 
-    public synchronized Album savaAlbum(Album album) {
+    public synchronized void saveAlbum(Album album) {
+
+        if (album == null || album.getAlbumCategories().size() == 0)
+            return;
+
+        AlbumCategory albumCategory = new AlbumCategory();
+
+        for (AlbumCategory tempAlbumCategory : album.getAlbumCategories()) {
+            albumCategory = tempAlbumCategory;
+        }
+
         Album result = albumRepository.findOne(album.getId());
-        return result == null ? albumRepository.saveAndFlush(album) : result;
+
+        if (result == null) {
+            albumRepository.save(album);
+        } else {
+
+            boolean isExist = false;
+            for (AlbumCategory category : result.getAlbumCategories()) {
+
+                if (category.getUrl().equals(albumCategory.getUrl())) {
+                    isExist = true;
+                    break;
+                }
+            }
+
+            if (!isExist) {
+                result.getAlbumCategories().add(albumCategory);
+                albumRepository.save(result);
+            }
+        }
+
     }
 
     public Song saveSongModel(Song song) {
@@ -77,9 +106,7 @@ public class CrawlerService {
             } else {
 
             }
-
         }
-
         return baseModel;
     }
 

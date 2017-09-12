@@ -16,7 +16,7 @@ public class AlbumCategory extends BaseModel{
 
     private String name;
 
-    @OneToMany(mappedBy = "albumCategory", cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "albumCategories")
     private Set<Album> albums;
 
     @Enumerated(EnumType.STRING)

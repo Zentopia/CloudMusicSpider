@@ -24,21 +24,21 @@ public class Album extends BaseModel{
     @Enumerated(EnumType.STRING)
     private CrawledStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "album_category_id")
-    private AlbumCategory albumCategory;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "album_join_category", joinColumns = @JoinColumn(name = "album_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "url"))
+    private Set<AlbumCategory> albumCategories;
 
     //构造方法
     public Album() {
 
     }
 
-    public Album(String id, String name, String url, String audienceNum, AlbumCategory albumCategory) {
+    public Album(String id, String name, String url, String audienceNum, Set<AlbumCategory> albumCategories) {
         this.id = id;
         this.name = name;
         this.url = url;
         this.audienceNum = audienceNum;
-        this.albumCategory = albumCategory;
+        this.albumCategories = albumCategories;
         this.status = CrawledStatus.notCrawled;
     }
 
@@ -58,12 +58,12 @@ public class Album extends BaseModel{
         this.name = name;
     }
 
-    public AlbumCategory getAlbumCategory() {
-        return albumCategory;
+    public Set<AlbumCategory> getAlbumCategories() {
+        return albumCategories;
     }
 
-    public void setAlbumCategory(AlbumCategory albumCategory) {
-        this.albumCategory = albumCategory;
+    public void setAlbumCategories(Set<AlbumCategory> albumCategories) {
+        this.albumCategories = albumCategories;
     }
 
     public String getUrl() {
