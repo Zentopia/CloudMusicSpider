@@ -46,6 +46,10 @@ public class CrawlerThread implements Runnable{
     private void scrachData(BaseModel webPageModel) throws Exception {
         if (webPageModel instanceof AlbumCategory) {
             parseAlbumCategory((AlbumCategory) webPageModel);
+        } else {
+            if (webPageModel instanceof Album) {
+                parseAlbum((Album) webPageModel);
+            }
         }
     }
 
@@ -58,7 +62,14 @@ public class CrawlerThread implements Runnable{
 
         do {
             String url = String.format("%s&limit=%d&offset=%d", albumCategory.getUrl(), limit, offset);
-            Connection.Response response = Jsoup.connect(url).timeout(3000).execute();
+            Connection.Response response = null;
+
+            try {
+                response = Jsoup.connect(url).timeout(3000).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             albumCategory.setHtml(response.body());
 
             if (response.statusCode() / 100 == 2) {
@@ -96,15 +107,21 @@ public class CrawlerThread implements Runnable{
         return albums;
     }
 
-    private List<WebPageModel> parsePlaylist(WebPageModel webPageModel) {
-        String url = webPageModel.getUrl();
+    private List<WebPageModel> parseAlbum(Album album) {
+        String url = album.getUrl();
         Connection.Response response = null;
         try {
             response = Jsoup.connect(url).timeout(3000).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        webPageModel.setHtml(response.body());
+        album.setHtml(response.body());
+
+        if (response.statusCode() / 100 == 2) {
+            Document doc = Jsoup.parse(album.getHtml());
+            Elements songElements = doc.select("ul.f-hide");
+        }
+
         return null;
     }
 

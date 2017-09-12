@@ -5,8 +5,13 @@ import java.util.Set;
 
 @Entity
 public class Album extends BaseModel{
+
+    public enum CrawledStatus {
+        crawled,
+        notCrawled
+    }
+
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
 
     private String name;
@@ -16,10 +21,8 @@ public class Album extends BaseModel{
     private int playNum;
     private int collectionNum;
 
-    public enum CrawledStatus {
-        crawled,
-        notCrawled
-    }
+    @Transient
+    private String html;
 
     @Enumerated(EnumType.STRING)
     private CrawledStatus status;
@@ -27,6 +30,9 @@ public class Album extends BaseModel{
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "album_join_category", joinColumns = @JoinColumn(name = "album_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "url"))
     private Set<AlbumCategory> albumCategories;
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "albums")
+    private Set<Song> songs;
 
     //构造方法
     public Album() {
@@ -80,5 +86,45 @@ public class Album extends BaseModel{
 
     public void setAudienceNum(String audienceNum) {
         this.audienceNum = audienceNum;
+    }
+
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    public int getSongsNum() {
+        return songsNum;
+    }
+
+    public void setSongsNum(int songsNum) {
+        this.songsNum = songsNum;
+    }
+
+    public int getPlayNum() {
+        return playNum;
+    }
+
+    public void setPlayNum(int playNum) {
+        this.playNum = playNum;
+    }
+
+    public int getCollectionNum() {
+        return collectionNum;
+    }
+
+    public void setCollectionNum(int collectionNum) {
+        this.collectionNum = collectionNum;
+    }
+
+    public CrawledStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CrawledStatus status) {
+        this.status = status;
     }
 }

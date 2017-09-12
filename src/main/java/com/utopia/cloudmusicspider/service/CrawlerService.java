@@ -1,10 +1,8 @@
 package com.utopia.cloudmusicspider.service;
 
 import com.utopia.cloudmusicspider.model.*;
-import com.utopia.cloudmusicspider.model.WebPageModel.CrawledStatus;
 import com.utopia.cloudmusicspider.repository.AlbumCategoryRepository;
 import com.utopia.cloudmusicspider.repository.AlbumRepository;
-import com.utopia.cloudmusicspider.repository.WebPageModelRepository;
 import com.utopia.cloudmusicspider.repository.SongModelRepository;
 import net.sf.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,6 @@ public class CrawlerService {
     @Autowired
     AlbumCategoryRepository albumCategoryRepository;
 
-
     public CrawlerService() {
         cacheManager = CacheManager.getInstance();
     }
@@ -61,10 +58,13 @@ public class CrawlerService {
         Album result = albumRepository.findOne(album.getId());
 
         if (result == null) {
+
             albumRepository.save(album);
+
         } else {
 
             boolean isExist = false;
+
             for (AlbumCategory category : result.getAlbumCategories()) {
 
                 if (category.getUrl().equals(albumCategory.getUrl())) {
@@ -74,11 +74,12 @@ public class CrawlerService {
             }
 
             if (!isExist) {
+
                 result.getAlbumCategories().add(albumCategory);
+
                 albumRepository.save(result);
             }
         }
-
     }
 
     public Song saveSongModel(Song song) {
@@ -151,6 +152,4 @@ public class CrawlerService {
 //        Ehcache ehcache = cacheManager.getEhcache(cacheName);
 //        ehcache.removeAll();
     }
-
-
 }
