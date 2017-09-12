@@ -119,7 +119,7 @@ public class CrawlerThread implements Runnable{
 
         if (response.statusCode() / 100 == 2) {
             Document doc = Jsoup.parse(album.getHtml());
-            Elements songElements = doc.select("ul.f-hide");
+            Element subElement = doc.select("div#song-list-pre-cache").first();
         }
 
         return null;
