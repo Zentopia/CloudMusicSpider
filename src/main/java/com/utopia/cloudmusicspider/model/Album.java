@@ -12,11 +12,21 @@ public class Album extends BaseModel{
     private String name;
     private String url;
     private String audienceNum;
+    private int songsNum;
+    private int playNum;
+    private int collectionNum;
+
+    public enum CrawledStatus {
+        crawled,
+        notCrawled
+    }
+
+    @Enumerated(EnumType.STRING)
+    private CrawledStatus status;
 
     @ManyToOne
     @JoinColumn(name = "album_category_id")
     private AlbumCategory albumCategory;
-
 
     //构造方法
     public Album() {
@@ -29,6 +39,7 @@ public class Album extends BaseModel{
         this.url = url;
         this.audienceNum = audienceNum;
         this.albumCategory = albumCategory;
+        this.status = CrawledStatus.notCrawled;
     }
 
     public String getId(){

@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
  * Copyright © 2017 utopia. All rights reserved.
  */
 
-
 @Service
 public class CrawlerService {
 
@@ -68,14 +67,13 @@ public class CrawlerService {
         return albumCategoryRepository.save(albumCategory);
     }
 
-
     public synchronized BaseModel getUnCrawlPage() {
 
         BaseModel baseModel = albumCategoryRepository.findTopByStatus(AlbumCategory.CrawledStatus.notCrawled);
         if (baseModel != null) {
             if (baseModel instanceof AlbumCategory) {
-//                ((AlbumCategory)baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
-//                updateAlbumCategory((AlbumCategory) baseModel);
+                ((AlbumCategory) baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
+                updateAlbumCategory((AlbumCategory) baseModel);
             } else {
 
             }
