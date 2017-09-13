@@ -29,13 +29,14 @@ public class Song {
         super();
     }
 
-    public Song(String id, String name, String url, Long commentCount) {
+    public Song(String id, String name, String url, Set<Album> albums) {
         this.id = id;
         this.name = name;
         this.url = url;
-        this.commentCount = commentCount;
+        this.albums = albums;
         this.status = CrawledStatus.notCrawled;
     }
+
 
     public String getId() {
         return id;

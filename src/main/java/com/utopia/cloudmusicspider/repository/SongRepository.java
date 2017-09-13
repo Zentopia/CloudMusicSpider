@@ -7,9 +7,11 @@ package com.utopia.cloudmusicspider.repository;
 
 import com.utopia.cloudmusicspider.model.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface SongModelRepository extends JpaRepository<Song, String>{
+@Repository
+public interface SongRepository extends JpaRepository<Song, String> {
     List<Song> findByCommentCountGreaterThan(Long commentCount);
 }

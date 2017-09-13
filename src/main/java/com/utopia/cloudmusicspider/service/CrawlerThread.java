@@ -1,5 +1,6 @@
 package com.utopia.cloudmusicspider.service;
 
+import com.utopia.cloudmusicspider.common.UTUtil;
 import com.utopia.cloudmusicspider.model.*;
 import com.utopia.cloudmusicspider.model.WebPageModel.PageType;
 import org.jsoup.Connection;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 public class CrawlerThread implements Runnable{
 
-    public static final String BASE_URL = "http://music.163.com/";
+    public static final String BASE_URL = "http://music.163.com";
     public static final String text = "{\"username\": \"\", \"rememberLogin\": \"true\", \"password\": \"\"}";
     private CrawlerService crawlerService;
 
@@ -49,18 +50,19 @@ public class CrawlerThread implements Runnable{
         } else {
             if (webPageModel instanceof Album) {
                 parseAlbum((Album) webPageModel);
+
             }
         }
     }
 
-    private List<Album> parseAlbumCategory(AlbumCategory albumCategory) throws IOException {
+    private void parseAlbumCategory(AlbumCategory albumCategory) throws IOException {
 
         int limit = 35;
         int offset = 0;
         int elementNum = 0;
-        List<Album> albums = new ArrayList<Album>();
 
         do {
+
             String url = String.format("%s&limit=%d&offset=%d", albumCategory.getUrl(), limit, offset);
             Connection.Response response = null;
 
@@ -96,7 +98,6 @@ public class CrawlerThread implements Runnable{
 
                     Album album = new Album(albumID, albumName, albumUrl, audienceNum, albumCategories);
                     crawlerService.saveAlbum(album);
-                    albums.add(album);
                 }
 
                 offset = offset + limit;
@@ -104,10 +105,9 @@ public class CrawlerThread implements Runnable{
 
         } while (elementNum > 0);
 
-        return albums;
     }
 
-    private List<WebPageModel> parseAlbum(Album album) {
+    private void parseAlbum(Album album) {
         String url = album.getUrl();
         Connection.Response response = null;
         try {
@@ -120,9 +120,20 @@ public class CrawlerThread implements Runnable{
         if (response.statusCode() / 100 == 2) {
             Document doc = Jsoup.parse(album.getHtml());
             Element subElement = doc.select("div#song-list-pre-cache").first();
-        }
+            Elements songElements = subElement.select("a");
 
-        return null;
+            for (Element element : songElements) {
+                String subUrl = element.attr("href");
+                String songID = UTUtil.getNumString(subUrl);
+                String songUrl = BASE_URL + subUrl;
+                String songName = element.text();
+                Set<Album> albums = new HashSet<Album>();
+                albums.add(album);
+                Song song = new Song(songID, songName, songUrl, albums);
+                crawlerService.saveSong(song);
+                int a = 0;
+            }
+        }
     }
 
     private Song parseSong(WebPageModel webPage) throws Exception {

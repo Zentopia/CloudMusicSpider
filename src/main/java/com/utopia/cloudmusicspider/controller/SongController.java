@@ -1,6 +1,6 @@
 package com.utopia.cloudmusicspider.controller;
 
-import com.utopia.cloudmusicspider.repository.SongModelRepository;
+import com.utopia.cloudmusicspider.repository.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class SongController {
 
     @Autowired
-    SongModelRepository songRepository;
+    SongRepository songRepository;
 
     @GetMapping({"/songs", ""})
     public String songs(Model model,

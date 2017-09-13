@@ -3,7 +3,7 @@ package com.utopia.cloudmusicspider.service;
 import com.utopia.cloudmusicspider.model.*;
 import com.utopia.cloudmusicspider.repository.AlbumCategoryRepository;
 import com.utopia.cloudmusicspider.repository.AlbumRepository;
-import com.utopia.cloudmusicspider.repository.SongModelRepository;
+import com.utopia.cloudmusicspider.repository.SongRepository;
 import net.sf.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class CrawlerService {
 
     private static final Integer MAX_THREADS = 20;
     @Autowired
-    SongModelRepository songModelRepository;
+    SongRepository songRepository;
     @Autowired
     AlbumRepository albumRepository;
     @Autowired
@@ -40,8 +40,14 @@ public class CrawlerService {
     }
 
     public AlbumCategory saveAlbumCategory(AlbumCategory albumCategory) {
-        AlbumCategory result = albumCategoryRepository.findOne(albumCategory.getUrl());
+        AlbumCategory result = albumCategoryRepository.getOne(albumCategory.getUrl());
         return result == null ? albumCategoryRepository.saveAndFlush(albumCategory) : result;
+    }
+
+    public synchronized Song saveSong(Song song) {
+
+        Song result = songRepository.findOne(song.getId());
+        return result == null ? songRepository.saveAndFlush(song) : result;
     }
 
     public synchronized void saveAlbum(Album album) {
@@ -58,9 +64,7 @@ public class CrawlerService {
         Album result = albumRepository.findOne(album.getId());
 
         if (result == null) {
-
-            albumRepository.save(album);
-
+            albumRepository.saveAndFlush(album);
         } else {
 
             boolean isExist = false;
@@ -74,36 +78,24 @@ public class CrawlerService {
             }
 
             if (!isExist) {
-
                 result.getAlbumCategories().add(albumCategory);
-
-                albumRepository.save(result);
+                albumRepository.saveAndFlush(result);
             }
         }
     }
 
-    public Song saveSongModel(Song song) {
-        Song result = songModelRepository.findOne(song.getUrl());
-        if(result == null) {
-            result = songModelRepository.saveAndFlush(song);
-        } else {
-            result.setCommentCount(song.getCommentCount());
-            result = songModelRepository.saveAndFlush(result);
-        }
-        return result;
-    }
-
-    public AlbumCategory updateAlbumCategory(AlbumCategory albumCategory) {
-        return albumCategoryRepository.save(albumCategory);
-    }
 
     public synchronized BaseModel getUnCrawlPage() {
 
         BaseModel baseModel = albumCategoryRepository.findTopByStatus(AlbumCategory.CrawledStatus.notCrawled);
         if (baseModel != null) {
-            if (baseModel instanceof AlbumCategory) {
-                ((AlbumCategory) baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
-                updateAlbumCategory((AlbumCategory) baseModel);
+            ((AlbumCategory) baseModel).setStatus(AlbumCategory.CrawledStatus.crawled);
+            albumCategoryRepository.save((AlbumCategory) baseModel);
+        } else {
+            baseModel = albumRepository.findTopByStatus(Album.CrawledStatus.notCrawled);
+            if (baseModel != null) {
+                ((Album) baseModel).setStatus(Album.CrawledStatus.crawled);
+                albumRepository.save((Album) baseModel);
             } else {
 
             }
